@@ -1,0 +1,72 @@
+# .eslintignore
+
+# Node modules
+node_modules/**
+
+# Build outputs
+dist/
+build/
+.astro/
+
+# Public assets
+public/
+
+# Shield files
+generated/
+
+# Environment files
+.env
+.env.*
+
+# Vercel files
+.vercel/
+vercel.json
+
+# Editor settings
+.vscode/
+.idea/
+
+# Git files
+.git/
+.gitignore
+
+# NVM configuration
+.nvmrc
+
+# Lock files
+bun.lockb
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Configuration files
+*.config.js
+*.config.cjs
+*.config.ts
+*.config.mjs
+
+# Prettier files
+.prettierignore
+.prettierrc
+.prettierrc.*
+
+# Other root files
+README.md
+LICENSE
+components.json
+package.json
+tsconfig.json
+astro.config.*
+tailwind.config.*
+
+# Ignore all other hidden files and directories
+.*
+# But do not ignore ESLint and Prettier config files
+!.eslintrc.js
+!.eslintrc.cjs
+!.eslintrc.json
+!.prettierrc
+!.prettierrc.*
+
+# Optional: Ignore MacOS system files
+.DS_Store

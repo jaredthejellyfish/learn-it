@@ -1,0 +1,45 @@
+---
+import '@/styles/globals.css';
+import '@/styles/fonts.css';
+
+interface Props {
+  title?: string | undefined;
+  description?: string | undefined;
+  ogImage?: URL | undefined;
+}
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+
+if (Astro.props.ogImage === undefined) {
+  Astro.props.ogImage = new URL('og-image.png', canonicalURL);
+}
+
+const { title, description, ogImage } = Astro.props;
+---
+
+<meta charset="utf-8" />
+<meta content="index, follow" name="robots" />
+<meta content="index, follow" name="googlebot" />
+<meta content="width=device-width, initial-scale=1" name="viewport" />
+<meta content={Astro.generator} name="generator" />
+<link href={canonicalURL} rel="canonical" />
+<link
+  href={`${Astro.site}favicon.ico`}
+  rel="shortcut icon"
+  type="image/svg+xml"
+/>
+<title>{title}</title>
+<meta content={title} name="title" />
+<meta content={description} name="description" />
+
+<meta content="website" property="og:type" />
+<meta content={canonicalURL} property="og:url" />
+<meta content={title} property="og:title" />
+<meta content={description} property="og:description" />
+<meta content={ogImage} property="og:image" />
+
+<meta content="summary_large_image" property="twitter:card" />
+<meta content={canonicalURL} property="twitter:url" />
+<meta content={title} property="twitter:title" />
+<meta content={description} property="twitter:description" />
+<meta content={ogImage} property="twitter:image" />
