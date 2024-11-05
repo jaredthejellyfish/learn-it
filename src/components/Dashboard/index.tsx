@@ -2,7 +2,6 @@ import { motion } from 'framer-motion'
 import { BookOpen, ChevronRight, Search, Zap } from 'lucide-react'
 import { useState } from 'react'
 
-
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -76,17 +75,11 @@ export default function UserDashboard({ courses }: { courses: UserCourses }) {
                   <p className="text-gray-600 dark:text-gray-300 mb-4">
                     {course.description.slice(0, 200)}...
                   </p>
-                  <div className="space-y-2">
-                    <div className="flex items-center">
-                      <BookOpen className="w-4 h-4 mr-2 text-purple-600" />
-                      <span>{0} Modules</span>
-                    </div>
-                  </div>
                 </CardContent>
                 <CardFooter className="flex-none mt-auto">
                   <Button className="w-full group" asChild>
-                    <a 
-                      href={`/course/${course.id}`} 
+                    <a
+                      href={`/course/${course.id}`}
                       className="w-full hover:no-underline flex items-center justify-center"
                     >
                       Continue Learning{' '}
@@ -119,7 +112,8 @@ export default function UserDashboard({ courses }: { courses: UserCourses }) {
           className="mt-12 text-center w-full"
         >
           <Button size="lg" className="group">
-            Generate New Course <Zap className="ml-2 w-4 h-4 transition-transform duration-200 group-hover:scale-110" />
+            Generate New Course{' '}
+            <Zap className="ml-2 w-4 h-4 transition-transform duration-200 group-hover:scale-110" />
           </Button>
         </motion.div>
       </main>

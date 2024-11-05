@@ -13,18 +13,42 @@ import {
   isDbError,
 } from 'astro:db'
 import OpenAI from 'openai'
+import PQueue from 'p-queue'
 import { z } from 'zod'
 
 import { type AnalyzedCourse } from '@/lib/schemas/analyze'
 import type { GenerateLesson } from '@/lib/schemas/generate-lesson'
 import type { GenerateLessonAPIResponse } from '@/lib/types'
 
-// Request validation schema
+// Type definitions
+interface ModuleLesson {
+  title: string
+  description: string
+  resources: string[]
+  materials: string[]
+  blurb: string
+  orderIndex: number
+}
+
+interface CourseModule {
+  title: string
+  description: string
+  orderIndex: number
+  lessons: ModuleLesson[]
+}
+
 const requestSchema = z.object({
   jobID: z.string().min(1),
 })
 
-// Template literal type for better type safety
+// Utility function to chunk array
+function chunkArray<T>(array: T[], chunkSize: number): T[][] {
+  return Array.from(
+    { length: Math.ceil(array.length / chunkSize) },
+    (_, index) => array.slice(index * chunkSize, (index + 1) * chunkSize),
+  )
+}
+
 const lessonGenerator = ({
   title,
   description,
@@ -103,6 +127,14 @@ Structure the lesson as:
 - Output should be in markdown format and have no other formatting
 - Output should only contain the content of the lesson and nothing else`
 
+// Create OpenAI instance
+const openai = new OpenAI({
+  apiKey: import.meta.env.OPENAI_API_KEY,
+})
+
+// Create queue for OpenAI calls
+const openAIQueue = new PQueue({ concurrency: 4 })
+
 async function generateLesson({
   title,
   description,
@@ -120,42 +152,213 @@ async function generateLesson({
   courseTitle: string
   courseDescription: string
 }): Promise<GenerateLesson | null> {
-  const openai = new OpenAI({
-    apiKey: import.meta.env.OPENAI_API_KEY,
-  })
-
   try {
-    const completion = await openai.chat.completions.create({
-      model: 'o1-mini',
-      messages: [
-        {
-          role: 'user',
-          content: lessonGenerator({
-            title,
-            description,
-            resources,
-            materials,
-            blurb,
-            courseTitle,
-            courseDescription,
-          }),
-        },
-      ],
+    const result = await openAIQueue.add(async () => {
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'user',
+            content: lessonGenerator({
+              title,
+              description,
+              resources,
+              materials,
+              blurb,
+              courseTitle,
+              courseDescription,
+            }),
+          },
+        ],
+      })
+
+      const content = completion.choices[0]?.message.content
+
+      if (!content) {
+        console.error('No content generated from OpenAI')
+        return null
+      }
+
+      return content
     })
 
-    const content = completion.choices[0]?.message.content
-
-    if (!content) {
-      console.error('No content generated from OpenAI')
-      return null
-    }
-
-    return { content }
+    return result ? { content: result } : null
   } catch (error) {
     console.error('OpenAI API error:', error)
     return null
   }
 }
+
+async function insertResources(
+  lessonId: string,
+  resources: string[],
+  type: 'resource' | 'material',
+): Promise<void> {
+  if (!resources?.length) return
+
+  const chunks = chunkArray(resources, 50)
+  for (const chunk of chunks) {
+    await Promise.all(
+      chunk.map((resource: string) =>
+        db
+          .insert(Resource)
+          .values({
+            id: crypto.randomUUID(),
+            lessonId,
+            resource,
+            type,
+          })
+          .run(),
+      ),
+    )
+  }
+}
+
+async function createCourse(
+  userId: string,
+  courseStructure: AnalyzedCourse,
+): Promise<string> {
+  // Create course first
+  const courseId = crypto.randomUUID()
+  await db
+    .insert(Course)
+    .values({
+      id: courseId,
+      difficulty: courseStructure.difficulty || 'beginner',
+      userId,
+      title: courseStructure.title,
+      description: courseStructure.description,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .run()
+
+  // After course is created, insert topics and objectives in parallel
+  await Promise.all(
+    [
+      // Insert topics
+      courseStructure.key_topics?.length &&
+        Promise.all(
+          courseStructure.key_topics.map((topicName) =>
+            db
+              .insert(Topic)
+              .values({
+                id: crypto.randomUUID(),
+                courseId,
+                name: topicName,
+              })
+              .run(),
+          ),
+        ),
+      // Insert learning objectives
+      courseStructure.learning_objectives?.length &&
+        Promise.all(
+          courseStructure.learning_objectives.map((objective) =>
+            db
+              .insert(LearningObjective)
+              .values({
+                id: crypto.randomUUID(),
+                courseId,
+                objective,
+              })
+              .run(),
+          ),
+        ),
+    ].filter(Boolean),
+  )
+
+  return courseId
+}
+
+async function createModule(
+  module: CourseModule,
+  courseId: string,
+): Promise<string> {
+  const moduleId = crypto.randomUUID()
+  await db
+    .insert(Module)
+    .values({
+      id: moduleId,
+      courseId,
+      title: module.title,
+      description: module.description,
+      orderIndex: module.orderIndex,
+    })
+    .run()
+
+  return moduleId
+}
+
+async function processModuleWithLessons(
+  module: CourseModule,
+  courseId: string,
+  courseStructure: AnalyzedCourse,
+): Promise<void> {
+  // Create module first
+  const moduleId = await createModule(module, courseId)
+
+  // Generate all lesson content in parallel
+  const lessonContentsPromises = module.lessons.map((lesson) =>
+    generateLesson({
+      title: lesson.title,
+      description: lesson.description,
+      resources: lesson.resources,
+      materials: lesson.materials,
+      blurb: lesson.blurb,
+      courseTitle: courseStructure.title,
+      courseDescription: courseStructure.description,
+    }),
+  )
+
+  const lessonContents = await Promise.all(lessonContentsPromises)
+
+  // Process lessons sequentially to maintain order
+  for (const [index, lesson] of module.lessons.entries()) {
+    const generatedContent = lessonContents[index]
+    if (!generatedContent) {
+      throw new Error(`Failed to generate content for lesson: ${lesson.title}`)
+    }
+
+    // Insert lesson
+    const lessonId = crypto.randomUUID()
+    await db
+      .insert(Lesson)
+      .values({
+        id: lessonId,
+        moduleId,
+        title: lesson.title,
+        description: lesson.description,
+        content: generatedContent.content,
+        blurb: lesson.blurb,
+        orderIndex: lesson.orderIndex,
+      })
+      .run()
+
+    // After lesson is inserted, handle resources and materials in parallel
+    await Promise.all([
+      insertResources(lessonId, lesson.resources, 'resource'),
+      insertResources(lessonId, lesson.materials, 'material'),
+    ])
+  }
+
+  // After all lessons are created, insert assessment if it exists
+  const moduleAssessment = courseStructure.assessments?.find(
+    (assessment) => assessment.module_name === module.title,
+  )
+
+  if (moduleAssessment) {
+    await db
+      .insert(Assessment)
+      .values({
+        id: crypto.randomUUID(),
+        moduleId,
+        title: moduleAssessment.title,
+        description: moduleAssessment.description,
+      })
+      .run()
+  }
+}
+
 export const POST: APIRoute = async (ctx) => {
   try {
     const rawBody = await ctx.request.json()
@@ -189,8 +392,6 @@ export const POST: APIRoute = async (ctx) => {
     }
 
     const { jobID } = validationResult.data
-
-    // Fetch job from database
     const job = await db.select().from(Jobs).where(eq(Jobs.id, jobID)).get()
 
     if (!job) {
@@ -208,159 +409,17 @@ export const POST: APIRoute = async (ctx) => {
     const courseStructure = job.course_structure as AnalyzedCourse
 
     try {
-      // Start with course creation since it's the root entity
-      const courseId = crypto.randomUUID()
-      await db
-        .insert(Course)
-        .values({
-          id: courseId,
-          difficulty: courseStructure.difficulty || 'beginner', // Providing a default
-          userId: job.userId,
-          title: courseStructure.title,
-          description: courseStructure.description,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .run()
+      // Step 1: Create course and its associated entities
+      const courseId = await createCourse(job.userId, courseStructure)
 
-      // Insert topics for the course
-      if (courseStructure.key_topics?.length) {
-        await Promise.all(
-          courseStructure.key_topics.map(async (topicName) => {
-            await db
-              .insert(Topic)
-              .values({
-                id: crypto.randomUUID(),
-                courseId,
-                name: topicName,
-              })
-              .run()
-          }),
-        )
-      }
-
-      // Insert learning objectives
-      if (courseStructure.learning_objectives?.length) {
-        await Promise.all(
-          courseStructure.learning_objectives.map(async (objective) => {
-            await db
-              .insert(LearningObjective)
-              .values({
-                id: crypto.randomUUID(),
-                courseId,
-                objective,
-              })
-              .run()
-          }),
-        )
-      }
-
-      // Insert modules and their related entities
-      if (courseStructure.modules?.length) {
+      // Step 2: Process modules sequentially to maintain order
+      if (courseStructure.modules) {
         for (const module of courseStructure.modules) {
-          // Create module
-          const moduleId = crypto.randomUUID()
-          await db
-            .insert(Module)
-            .values({
-              id: moduleId,
-              courseId,
-              title: module.title,
-              description: module.description,
-              orderIndex: module.orderIndex,
-            })
-            .run()
-
-          // Generate and insert lessons for this module
-          if (module.lessons?.length) {
-            for (const lesson of module.lessons) {
-              const generatedContent = await generateLesson({
-                title: lesson.title,
-                description: lesson.description,
-                resources: lesson.resources,
-                materials: lesson.materials,
-                blurb: lesson.blurb,
-                courseTitle: courseStructure.title,
-                courseDescription: courseStructure.description,
-              })
-
-              if (!generatedContent) {
-                throw new Error(
-                  `Failed to generate content for lesson: ${lesson.title}`,
-                )
-              }
-
-              // Insert lesson
-              const lessonId = crypto.randomUUID()
-              await db
-                .insert(Lesson)
-                .values({
-                  id: lessonId,
-                  moduleId,
-                  title: lesson.title,
-                  description: lesson.description,
-                  content: generatedContent.content,
-                  blurb: lesson.blurb,
-                  orderIndex: lesson.orderIndex,
-                })
-                .run()
-
-              // Insert resources
-              if (lesson.resources?.length) {
-                await Promise.all(
-                  lesson.resources.map(async (resource) => {
-                    await db
-                      .insert(Resource)
-                      .values({
-                        id: crypto.randomUUID(),
-                        lessonId,
-                        resource,
-                        type: 'resource',
-                      })
-                      .run()
-                  }),
-                )
-              }
-
-              // Insert materials
-              if (lesson.materials?.length) {
-                await Promise.all(
-                  lesson.materials.map(async (material) => {
-                    await db
-                      .insert(Resource)
-                      .values({
-                        id: crypto.randomUUID(),
-                        lessonId,
-                        resource: material,
-                        type: 'material',
-                      })
-                      .run()
-                  }),
-                )
-              }
-            }
-          }
-
-          // Insert assessment if it exists for this module
-          const moduleAssessment = courseStructure.assessments?.find(
-            (assessment) => assessment.module_name === module.title,
-          )
-
-          if (moduleAssessment) {
-            await db
-              .insert(Assessment)
-              .values({
-                id: crypto.randomUUID(),
-                moduleId,
-                title: moduleAssessment.title,
-                description: moduleAssessment.description,
-              })
-              .run()
-          }
+          await processModuleWithLessons(module, courseId, courseStructure)
         }
       }
 
-      // Update job status
+      // Step 3: Update job status after everything is complete
       await db
         .update(Jobs)
         .set({
@@ -370,7 +429,6 @@ export const POST: APIRoute = async (ctx) => {
         .where(eq(Jobs.id, jobID))
         .run()
 
-      // Return success response
       return new Response(
         JSON.stringify({
           error: false,
@@ -389,7 +447,7 @@ export const POST: APIRoute = async (ctx) => {
       )
     } catch (dbError) {
       console.error('Database operation failed:', dbError)
-      throw dbError // Re-throw to be caught by outer catch block
+      throw dbError
     }
   } catch (e) {
     if (isDbError(e)) {
