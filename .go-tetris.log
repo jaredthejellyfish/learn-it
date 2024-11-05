@@ -1,0 +1,39 @@
+2024/11/04 00:30:07 engine.go:57: Engine Start start
+2024/11/04 00:30:07 engine.go:29: Engine Run start
+2024/11/04 00:30:07 engine.go:123: Engine NewGame start
+2024/11/04 00:30:07 engine.go:143: Engine NewGame end
+2024/11/04 00:32:24 engine.go:226: Engine GameOver start
+2024/11/04 00:32:24 view.go:271: View ShowGameOverAnimation start
+2024/11/04 00:32:24 view.go:275: View ShowGameOverAnimation case 0
+2024/11/04 00:32:26 view.go:338: View ShowGameOverAnimation end
+2024/11/04 00:32:26 engine.go:245: Engine GameOver end
+2024/11/04 00:32:27 engine.go:86: Engine Start end
+2024/11/04 00:32:27 view.go:31: View Stop start
+2024/11/04 00:32:27 engine.go:52: Engine Run end
+2024/11/04 00:32:27 view.go:35: View Stop end
+2024/11/04 00:32:28 engine.go:57: Engine Start start
+2024/11/04 00:32:28 engine.go:29: Engine Run start
+2024/11/04 00:32:28 engine.go:123: Engine NewGame start
+2024/11/04 00:32:28 engine.go:143: Engine NewGame end
+2024/11/04 00:38:15 engine.go:226: Engine GameOver start
+2024/11/04 00:38:15 view.go:271: View ShowGameOverAnimation start
+2024/11/04 00:38:15 view.go:275: View ShowGameOverAnimation case 0
+2024/11/04 00:38:16 view.go:338: View ShowGameOverAnimation end
+2024/11/04 00:38:16 engine.go:245: Engine GameOver end
+2024/11/04 00:38:18 engine.go:86: Engine Start end
+2024/11/04 00:38:18 view.go:31: View Stop start
+2024/11/04 00:38:18 engine.go:52: Engine Run end
+2024/11/04 00:38:18 view.go:35: View Stop end
+2024/11/04 00:38:25 engine.go:57: Engine Start start
+2024/11/04 00:38:25 engine.go:29: Engine Run start
+2024/11/04 00:38:25 engine.go:123: Engine NewGame start
+2024/11/04 00:38:25 engine.go:143: Engine NewGame end
+2024/11/04 00:44:05 engine.go:226: Engine GameOver start
+2024/11/04 00:44:05 view.go:271: View ShowGameOverAnimation start
+2024/11/04 00:44:05 view.go:275: View ShowGameOverAnimation case 0
+2024/11/04 00:44:06 view.go:338: View ShowGameOverAnimation end
+2024/11/04 00:44:06 engine.go:245: Engine GameOver end
+2024/11/04 00:44:10 engine.go:52: Engine Run end
+2024/11/04 00:44:10 engine.go:86: Engine Start end
+2024/11/04 00:44:10 view.go:31: View Stop start
+2024/11/04 00:44:10 view.go:35: View Stop end

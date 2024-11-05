@@ -1,11 +1,47 @@
 ---
-import LandingPage from '@/components/Landing';
-import Layout from '../layouts/Layout.astro';
+import { ArrowRight } from 'lucide-react'
+import { MobileNav } from '@/components/MobileNav'
+import { CourseGenerator } from '@/components/Landing/CourseGenerator'
+import { FeatureSection } from '@/components/Landing/FeatureSection'
+import { HowItWorks } from '@/components/Landing/HowItWorks'
+import { PricingSection } from '@/components/Landing/PricingSection'
 
+import Layout from '@/layouts/Layout.astro'
+import { Button } from '@/components/ui/button'
+import Footer from '@/components/Footer.astro'
 ---
 
-<Layout title="Welcome to Astro.">
-	<LandingPage client:load />
-	
-</Layout>
+<Layout
+  title="LearnIt"
+  description="LearnIt is a platform that uses AI to generate personalized learning experiences."
+>
+  <div
+    class="min-h-screen bg-gradient-to-b from-purple-100 to-white text-gray-900 dark:from-gray-900 dark:to-gray-800 dark:text-gray-100"
+  >
+    <MobileNav
+      isAuthenticated={Astro.locals.authStatus === 'signed-in'}
+      client:load
+    />
 
+    <main class="container mx-auto px-4 py-12">
+      <CourseGenerator client:load />
+      <FeatureSection client:load />
+      <HowItWorks client:load />
+      <PricingSection client:load />
+
+      <section class="text-center">
+        <h2 class="mb-6 text-3xl font-bold">
+          Ready to Transform Your Learning?
+        </h2>
+        <p class="mb-8 text-xl text-gray-600 dark:text-gray-300">
+          Join thousands of learners who are already benefiting from AI-powered
+          education.
+        </p>
+        <Button size="lg">
+          Start Your Learning Journey <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </section>
+    </main>
+    <Footer />
+  </div>
+</Layout>

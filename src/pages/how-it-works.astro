@@ -1,0 +1,120 @@
+---
+import Layout from '@/layouts/Layout.astro'
+import { MobileNav } from '@/components/MobileNav'
+import Header from '@/components/HowItWorks/Header'
+import { Button } from '@/components/ui/button'
+import { ArrowRight } from 'lucide-react'
+import Process from '@/components/HowItWorks/Process'
+import { Input } from '@/components/ui/input'
+import Footer from '@/components/Footer.astro'
+---
+
+<Layout>
+  <div
+    class="min-h-screen bg-gradient-to-b from-purple-100 to-white text-gray-900 dark:from-gray-900 dark:to-gray-800 dark:text-gray-100"
+  >
+    <MobileNav
+      isAuthenticated={Astro.locals.authStatus === 'signed-in'}
+      client:load
+    />
+    <main class="container mx-auto px-4 py-12">
+      <Header client:load />
+
+      <section class="mb-20">
+        <div class="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
+          <div>
+            <h2 class="mb-6 text-3xl font-bold">
+              The Power of AI in Your Learning Journey
+            </h2>
+            <p class="mb-6 text-lg text-gray-600 dark:text-gray-300">
+              LearnIt harnesses the latest advancements in artificial
+              intelligence to revolutionize the way you learn. Our platform
+              creates personalized, adaptive courses tailored to your specific
+              needs and learning style.
+            </p>
+            <Button size="lg">
+              Try It Now <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+          <div
+            class="rounded-lg bg-gradient-to-br from-purple-200 to-purple-50 p-8 shadow-lg dark:bg-gray-700 dark:from-purple-900 dark:to-purple-500/70"
+          >
+            <h3 class="mb-4 text-2xl font-semibold">Quick Start</h3>
+            <ol
+              class="list-inside list-decimal space-y-2 text-gray-600 dark:text-gray-300"
+            >
+              <li>Enter your desired topic</li>
+              <li>Wait a few seconds for AI generation</li>
+              <li>Start your personalized course</li>
+              <li>Learn at your own pace</li>
+              <li>Track your progress and adapt</li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <Process client:load />
+
+      <section class="mb-20">
+        <div class="rounded-lg bg-purple-100 p-8 shadow-lg dark:bg-gray-700">
+          <h2 class="mb-6 text-3xl font-bold">Frequently Asked Questions</h2>
+          <div class="space-y-6">
+            {
+              [
+                {
+                  question: 'How long does it take to generate a course?',
+                  answer:
+                    'Our AI typically generates a complete course within seconds, allowing you to start learning almost immediately.',
+                },
+                {
+                  question: 'Can I request changes to the generated course?',
+                  answer:
+                    'Yes, you can provide feedback and request modifications. Our AI will adapt the course based on your input.',
+                },
+                {
+                  question: 'Is the content up-to-date?',
+                  answer:
+                    'Our AI constantly updates its knowledge base to ensure you receive the most current information in your courses.',
+                },
+                {
+                  question: 'Can I access my courses on multiple devices?',
+                  answer:
+                    'Yes, your courses are accessible on any device with an internet connection, allowing you to learn on-the-go.',
+                },
+              ].map((faq) => (
+                <div>
+                  <h3 class="mb-2 text-xl font-semibold">{faq.question}</h3>
+                  <p class="text-gray-600 dark:text-gray-300">{faq.answer}</p>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </section>
+
+      <section class="text-center">
+        <h2 class="mb-6 text-3xl font-bold">
+          Ready to Revolutionize Your Learning?
+        </h2>
+        <p class="mb-8 text-xl text-gray-600 dark:text-gray-300">
+          Join thousands of learners who are already benefiting from AI-powered
+          education.
+        </p>
+        <div
+          class="flex flex-col items-center justify-center space-y-4 md:flex-row md:space-x-4 md:space-y-0"
+        >
+          <Input
+            type="email"
+            placeholder="Enter your email..."
+            className="w-full md:w-96"
+          />
+          <Button size="lg" className="w-full md:w-auto">
+            Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      </section>
+    </main>
+
+    <Footer />
+  </div>
+</Layout>

@@ -1,15 +1,22 @@
-/** @type {import('prettier').Config} */
+/** @type {import("prettier").Config} */
 export default {
   printWidth: 80,
   tabWidth: 2,
   semi: false,
   singleQuote: true,
   endOfLine: 'lf',
-  semi: true,
   plugins: [
     'prettier-plugin-astro',
     'prettier-plugin-tailwindcss',
     '@trivago/prettier-plugin-sort-imports',
+  ],
+  overrides: [
+    {
+      files: '*.astro',
+      options: {
+        parser: 'astro',
+      },
+    },
   ],
   importOrderSeparation: true,
   importOrderSortSpecifiers: true,
@@ -22,4 +29,4 @@ export default {
     '^@/(.*)$',
     '^[./]',
   ],
-};
+}

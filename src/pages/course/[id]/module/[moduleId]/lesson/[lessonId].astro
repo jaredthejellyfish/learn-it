@@ -1,0 +1,57 @@
+---
+import Footer from '@/components/Footer.astro'
+import LessonComponent from '@/components/Lesson'
+
+import { MobileNav } from '@/components/MobileNav'
+import Layout from '@/layouts/Layout.astro'
+import { getLessonData } from '@/lib/helpers/getLessonData'
+import { ChevronRight } from 'lucide-react'
+
+const { lessonId, moduleId, id } = Astro.params
+
+if (!lessonId || !moduleId || !id) {
+  return new Response('Not found', { status: 404 })
+}
+
+const data = await getLessonData(lessonId, moduleId, id)
+---
+
+<Layout>
+  <div
+    class="min-h-screen bg-gradient-to-b from-purple-100 to-white text-gray-900 dark:from-gray-900 dark:to-gray-800 dark:text-gray-100"
+  >
+    <MobileNav
+      isAuthenticated={Astro.locals.authStatus === 'signed-in'}
+      client:load
+    />
+    <div class="container mx-auto px-4 py-8">
+      <div class="mb-6 flex items-center space-x-2 px-1">
+        <a
+
+          href={`/course/${id}`}
+          class="flex items-center space-x-2"
+        >
+          <span class="text-md font-extralight text-muted-foreground"
+            >{data.courseData?.title}</span
+          >
+        </a>
+        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        <a
+          href={`/course/${id}/module/${moduleId}`}
+          class="flex items-center space-x-2"
+        >
+          <span class="text-md font-extralight text-muted-foreground"
+            >{data.moduleData?.title}</span
+          >
+        </a>
+        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        <span
+          class="text-md font-extralight text-purple-600/80 dark:text-purple-200/80"
+          >{data.lessonData?.title}</span
+        >
+      </div>
+      <LessonComponent client:load data={data} />
+    </div>
+    <Footer />
+  </div>
+</Layout>

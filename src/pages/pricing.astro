@@ -1,0 +1,76 @@
+---
+import Layout from '@/layouts/Layout.astro'
+import { ArrowRight } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import FeaturesTable from '@/components/Pricing/FeaturesTable'
+import Header from '@/components/Pricing/Header'
+import { MobileNav } from '@/components/MobileNav'
+import Footer from '@/components/Footer.astro'
+---
+
+<Layout>
+  <div
+    class="min-h-screen bg-gradient-to-b from-purple-100 to-white text-gray-900 dark:from-gray-900 dark:to-gray-800 dark:text-gray-100"
+  >
+    <MobileNav
+      isAuthenticated={Astro.locals.authStatus === 'signed-in'}
+      client:load
+    />
+
+    <main class="container mx-auto px-4 py-12">
+      <Header client:load />
+
+      <FeaturesTable />
+
+      <section class="mb-20 text-center">
+        <h2 class="mb-6 text-3xl font-bold">Frequently Asked Questions</h2>
+        <div class="grid gap-8 md:grid-cols-2">
+          {
+            [
+              {
+                question: 'Can I switch plans at any time?',
+                answer:
+                  'Yes, you can upgrade or downgrade your plan at any time. Changes will be reflected in your next billing cycle.',
+              },
+              {
+                question: 'Is there a free trial available?',
+                answer:
+                  'We offer a 7-day free trial for our Basic and Pro plans. No credit card is required to start your trial.',
+              },
+              {
+                question: 'What payment methods do you accept?',
+                answer:
+                  'We accept all major credit cards, PayPal, and bank transfers for Enterprise plans.',
+              },
+              {
+                question: 'Can I cancel my subscription?',
+                answer:
+                  'You can cancel your subscription at any time. Your access will continue until the end of your current billing period.',
+              },
+            ].map((faq) => (
+              <div class="text-left">
+                <h3 class="mb-2 text-xl font-semibold">{faq.question}</h3>
+                <p class="text-gray-600 dark:text-gray-300">{faq.answer}</p>
+              </div>
+            ))
+          }
+        </div>
+      </section>
+
+      <section
+        class="rounded-lg bg-purple-100 p-8 text-center shadow-lg dark:bg-gray-700"
+      >
+        <h2 class="mb-6 text-3xl font-bold">Ready to Get Started?</h2>
+        <p class="mb-8 text-xl text-gray-600 dark:text-gray-300">
+          Join thousands of learners who are already benefiting from AI-powered
+          education.
+        </p>
+        <Button size="lg">
+          Start Your Free Trial <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </section>
+    </main>
+
+    <Footer />
+  </div>
+</Layout>

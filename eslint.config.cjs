@@ -1,9 +1,9 @@
 // eslint.config.cjs
-const eslintPluginAstro = require('eslint-plugin-astro');
-const astroParser = require('astro-eslint-parser');
-const tsParser = require('@typescript-eslint/parser');
-const reactPlugin = require('eslint-plugin-react');
-const jsxA11yPlugin = require('eslint-plugin-jsx-a11y');
+const eslintPluginAstro = require('eslint-plugin-astro')
+const astroParser = require('astro-eslint-parser')
+const tsParser = require('@typescript-eslint/parser')
+const reactPlugin = require('eslint-plugin-react')
+const jsxA11yPlugin = require('eslint-plugin-jsx-a11y')
 
 module.exports = [
   // Include the recommended config from eslint-plugin-astro
@@ -107,4 +107,4 @@ module.exports = [
       // Add more A11Y rules as needed
     },
   },
-];
+]

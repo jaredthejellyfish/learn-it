@@ -1,0 +1,66 @@
+---
+import Layout from '@/layouts/Layout.astro'
+import Header from '@/components/Features/Header'
+import FeaturesSection from '@/components/Features/FeaturesSection'
+import { MobileNav } from '@/components/MobileNav'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { ArrowRight } from 'lucide-react'
+import Footer from '@/components/Footer.astro'
+---
+
+<Layout>
+  <div
+    class="min-h-screen bg-gradient-to-b from-purple-100 to-white text-gray-900 dark:from-gray-900 dark:to-gray-800 dark:text-gray-100"
+  >
+    <MobileNav
+      isAuthenticated={Astro.locals.authStatus === 'signed-in'}
+      client:load
+    />
+    <main class="container mx-auto px-4 py-12">
+      <Header client:load />
+      <FeaturesSection client:load />
+
+      <section class="mb-20 text-center">
+        <h2 class="mb-6 text-3xl font-bold">
+          Experience the Future of Learning
+        </h2>
+        <p class="mb-8 text-xl text-gray-600 dark:text-gray-300">
+          Join thousands of learners who are already benefiting from AI-powered
+          education.
+        </p>
+        <div
+          class="flex flex-col items-center justify-center space-y-4 md:flex-row md:space-x-4 md:space-y-0"
+        >
+          <Input
+            type="email"
+            placeholder="Enter your email..."
+            className="w-full md:w-96"
+          />
+          <Button size="lg" className="w-full md:w-auto">
+            Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      </section>
+
+      <section class="rounded-lg bg-purple-100 p-8 shadow-lg dark:bg-gray-700">
+        <div class="flex flex-col items-center justify-between md:flex-row">
+          <div class="mb-6 md:mb-0 md:mr-6">
+            <h2 class="mb-2 text-2xl font-bold">
+              Ready to transform your learning?
+            </h2>
+            <p class="text-gray-600 dark:text-gray-300">
+              Start your journey with LearnIt today and unlock your full
+              potential.
+            </p>
+          </div>
+          <Button size="lg" className="w-full md:w-auto">
+            Get Started Now
+          </Button>
+        </div>
+      </section>
+    </main>
+
+    <Footer />
+  </div>
+</Layout>

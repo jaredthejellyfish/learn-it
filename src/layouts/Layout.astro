@@ -1,33 +1,51 @@
 ---
-import HeadSEO from '@/components/HeadSEO.astro';
-import { ViewTransitions } from 'astro:transitions';
+import HeadSEO from '@/components/HeadSEO.astro'
+import LiveChat from '@/components/LiveChat'
+import { ViewTransitions } from 'astro:transitions'
 
 interface Props {
-  title?: string | undefined;
-  description?: string | undefined;
-  ogImage?: URL | undefined;
+  title?: string | undefined
+  description?: string | undefined
+  ogImage?: URL | undefined
 }
 
-const { title, description, ogImage } = Astro.props;
+const { title, description, ogImage } = Astro.props
 ---
 
 <script is:inline>
-	const getThemePreference = () => {
-		if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
-			return localStorage.getItem('theme');
-		}
-		return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-	};
-	const isDark = getThemePreference() === 'dark';
-	document.documentElement.classList[isDark ? 'add' : 'remove']('dark');
- 
-	if (typeof localStorage !== 'undefined') {
-		const observer = new MutationObserver(() => {
-			const isDark = document.documentElement.classList.contains('dark');
-			localStorage.setItem('theme', isDark ? 'dark' : 'light');
-		});
-		observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-	}
+  const getThemeCookie = () => {
+    const cookies = document.cookie.split(';')
+    const themeCookie = cookies.find((cookie) =>
+      cookie.trim().startsWith('theme='),
+    )
+    if (!themeCookie) return null
+    return themeCookie.split('=')[1]
+  }
+  const getThemePreference = () => {
+    if (getThemeCookie()) {
+      console.log('theme', getThemeCookie())
+      return getThemeCookie()
+    }
+    if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+      return localStorage.getItem('theme')
+    }
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light'
+  }
+  const isDark = getThemePreference() === 'dark'
+  document.documentElement.classList[isDark ? 'add' : 'remove']('dark')
+
+  if (typeof localStorage !== 'undefined') {
+    const observer = new MutationObserver(() => {
+      const isDark = document.documentElement.classList.contains('dark')
+      localStorage.setItem('theme', isDark ? 'dark' : 'light')
+    })
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    })
+  }
 </script>
 
 <html lang="en">
@@ -37,5 +55,6 @@ const { title, description, ogImage } = Astro.props;
   </head>
   <body class="font-sans antialiased dark:bg-neutral-900">
     <slot />
+    <LiveChat client:load />
   </body>
 </html>
