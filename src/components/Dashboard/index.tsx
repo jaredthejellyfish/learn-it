@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { BookOpen, ChevronRight, Search, Zap } from 'lucide-react'
+import { ChevronRight, Search, Zap } from 'lucide-react'
 import { useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'

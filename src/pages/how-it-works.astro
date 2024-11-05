@@ -7,6 +7,7 @@ import { ArrowRight } from 'lucide-react'
 import Process from '@/components/HowItWorks/Process'
 import { Input } from '@/components/ui/input'
 import Footer from '@/components/Footer.astro'
+import Description from '@/components/HowItWorks/Description'
 ---
 
 <Layout>
@@ -20,38 +21,7 @@ import Footer from '@/components/Footer.astro'
     <main class="container mx-auto px-4 py-12">
       <Header client:load />
 
-      <section class="mb-20">
-        <div class="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
-          <div>
-            <h2 class="mb-6 text-3xl font-bold">
-              The Power of AI in Your Learning Journey
-            </h2>
-            <p class="mb-6 text-lg text-gray-600 dark:text-gray-300">
-              LearnIt harnesses the latest advancements in artificial
-              intelligence to revolutionize the way you learn. Our platform
-              creates personalized, adaptive courses tailored to your specific
-              needs and learning style.
-            </p>
-            <Button size="lg">
-              Try It Now <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
-          <div
-            class="rounded-lg bg-gradient-to-br from-purple-200 to-purple-50 p-8 shadow-lg dark:bg-gray-700 dark:from-purple-900 dark:to-purple-500/70"
-          >
-            <h3 class="mb-4 text-2xl font-semibold">Quick Start</h3>
-            <ol
-              class="list-inside list-decimal space-y-2 text-gray-600 dark:text-gray-300"
-            >
-              <li>Enter your desired topic</li>
-              <li>Wait a few seconds for AI generation</li>
-              <li>Start your personalized course</li>
-              <li>Learn at your own pace</li>
-              <li>Track your progress and adapt</li>
-            </ol>
-          </div>
-        </div>
-      </section>
+      <Description client:load />
 
       <Process client:load />
 
@@ -64,7 +34,7 @@ import Footer from '@/components/Footer.astro'
                 {
                   question: 'How long does it take to generate a course?',
                   answer:
-                    'Our AI typically generates a complete course within seconds, allowing you to start learning almost immediately.',
+                    'Our AI typically generates a complete course within 8 minutes, allowing you to start learning within minutes.',
                 },
                 {
                   question: 'Can I request changes to the generated course?',

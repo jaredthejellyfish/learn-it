@@ -25,6 +25,7 @@ const generateLessons = async (jobId: string) => {
   try {
     const res = await fetch('/api/generator/generate-lessons', {
       method: 'POST',
+      keepalive: true,
       headers: {
         'Content-Type': 'application/json',
       },
